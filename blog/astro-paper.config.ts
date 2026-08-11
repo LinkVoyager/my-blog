@@ -2,11 +2,11 @@ import { defineAstroPaperConfig } from "./src/types/config";
 
 export default defineAstroPaperConfig({
   site: {
-    url: "https://astro-paper.pages.dev/",
+    url: "https://my-blog-delta-neon.vercel.app/",
     title: "Link的思考",
     description: "Just record it",
     author: "Link",
-    profile: "https://satna.ing",
+    profile: "https://github.com/LinkVoyager",
     ogImage: "default-og.jpg",
     lang: "zh-CN",
     timezone: "Asia/Shanghai",
@@ -24,7 +24,7 @@ export default defineAstroPaperConfig({
     showBackButton: true,
     editPost: {
       enabled: true,
-      url: "https://github.com/satnaing/astro-paper/edit/main/",
+      url: "https://github.com/LinkVoyager/my-blog/edit/main/",
     },
     search: "pagefind",
   },
