@@ -2,7 +2,7 @@ import { defineAstroPaperConfig } from "./src/types/config";
 
 export default defineAstroPaperConfig({
   site: {
-    url: "https://my-blog-delta-neon.vercel.app/",
+    url: "https://link-blog.vercel.app/",
     title: "Link的思考",
     description: "Just record it",
     author: "Link",

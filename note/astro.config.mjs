@@ -4,7 +4,7 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://note.example.com', // 部署后替换为实际域名
+  site: 'https://links-note.vercel.app',
   integrations: [
     starlight({
       title: 'Link 的笔记',
