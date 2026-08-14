@@ -63,7 +63,9 @@ freqs = 1.0 / (theta ** powers)
 
 `torch.arange(0, d_k, 2)` 生成 `[0, 2, 4, ..., d_k-2]`，一共 $d_k/2$ 个数——对应公式里的下标 $2i$（$i=0,\dots,d_k/2-1$）。除以 `d_k` 后就是指数 $\frac{2i}{d_k}$，所以：
 
-$$\omega_i = \theta^{-2i/d_k} = \frac{1}{\theta^{2i/d_k}}$$
+$$
+\omega_i = \theta^{-2i/d_k} = \frac{1}{\theta^{2i/d_k}}
+$$
 
 `freqs` 的形状是 `(d_k/2,)`。
 
@@ -85,7 +87,9 @@ freqs_matrix = torch.outer(t, freqs)
 
 `torch.outer(a, b)` 是外积，结果形状 `(len(a), len(b))`，第 `(m, i)` 个元素是 `a[m] * b[i]`。这里就是：
 
-$$\text{freqs\_matrix}[m, i] = m \times \omega_i = m\theta_i$$
+$$
+\text{freqs\_matrix}[m, i] = m \times \omega_i = m\theta_i
+$$
 
 也就是"第 $m$ 个位置、第 $i$ 组维度"应该旋转的角度。形状 `(context_length, d_k/2)`——每一行对应一个位置，每一列对应一组维度的角频率。这一步本质上是用一次矩阵运算，把 `context_length × d_k/2` 种"位置-频率"组合的角度全部一次性算出来，避免写循环。
 
@@ -179,7 +183,9 @@ freqs[1] = 1 / 10000^0.5 = 1 / 100   = 0.01
 
 **为什么要提前算好存起来**：旋转矩阵长这样：
 
-$$R(\text{角度}) = \begin{pmatrix}\cos & -\sin\\ \sin & \cos\end{pmatrix}$$
+$$
+R(\theta) = \begin{pmatrix}\cos & -\sin\\ \sin & \cos\end{pmatrix}
+$$
 
 要对某个位置的向量做旋转，本质上就是要用到这个位置对应的 `cos` 和 `sin` 这两个数字。与其等到真正跑 `forward()` 的时候，每次都现算 `cos(m*freq)`、`sin(m*freq)`（三角函数计算比较慢），不如在模型初始化的时候，把 0 到 `context_length-1` 每一个可能出现的位置、每一组维度，需要用到的 cos、sin 值，一次性全部算好存成两张表。之后不管处理哪一句话，`forward()` 里只要按这句话里每个 token 的位置去查表取数就行，不用重复计算——这是纯粹的"空间换时间"优化。
 

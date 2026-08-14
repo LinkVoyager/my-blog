@@ -1,0 +1,7 @@
+/* MathJax 公式排版修正
+   Starlight 会给 markdown 里的 svg 加 display:block，导致 MathJax SVG
+   脱离行内流、块级公式也无法居中。这里把 MathJax 的 svg 改回 inline-block。 */
+.sl-markdown-content mjx-container[jax='SVG'] > svg {
+  display: inline-block;
+  max-width: none;
+}
