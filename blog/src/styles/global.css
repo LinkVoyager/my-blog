@@ -21,7 +21,7 @@ body::before {
   background-size: cover;
   background-attachment: fixed;
   content: "";
-  opacity: var(--site-background-opacity, 0.28);
+  opacity: var(--site-background-opacity, 0.6);
   pointer-events: none;
 }
 

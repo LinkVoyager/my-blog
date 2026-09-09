@@ -3,12 +3,6 @@ import { getAssetPath } from "@/utils/withBase";
 
 const backgrounds = [
   { id: "city", label: "城市街景", src: getAssetPath("backgrounds/city.webp") },
-  { id: "desk", label: "书桌手稿", src: getAssetPath("backgrounds/desk.webp") },
-  {
-    id: "forest",
-    label: "森林小径",
-    src: getAssetPath("backgrounds/forest.webp"),
-  },
 ];
 ---
 
@@ -54,7 +48,7 @@ const backgrounds = [
       <div class="mb-1 flex items-center justify-between gap-2 text-xs">
         <label for="background-opacity">图片透明度</label>
         <output id="background-opacity-value" for="background-opacity"
-          >28%</output
+          >60%</output
         >
       </div>
       <input
@@ -62,9 +56,9 @@ const backgrounds = [
         class="accent-accent w-full"
         type="range"
         min="0"
-        max="60"
+        max="100"
         step="1"
-        value="28"
+        value="60"
         aria-label="调整背景图片透明度"
       />
     </div>
@@ -75,7 +69,7 @@ const backgrounds = [
   const BACKGROUND_KEY = "blog-background";
   const OPACITY_KEY = "blog-background-opacity";
   const DEFAULT_BACKGROUND = "city";
-  const DEFAULT_OPACITY = 28;
+  const DEFAULT_OPACITY = 60;
 
   function getOptions() {
     return Array.from(
@@ -107,7 +101,7 @@ const backgrounds = [
   }
 
   function applyOpacity(value: number, persist = true) {
-    const opacity = Math.min(60, Math.max(0, value));
+    const opacity = Math.min(100, Math.max(0, value));
     document.documentElement.style.setProperty(
       "--site-background-opacity",
       String(opacity / 100)
@@ -133,11 +127,16 @@ const backgrounds = [
 
     const savedBackground =
       localStorage.getItem(BACKGROUND_KEY) ?? DEFAULT_BACKGROUND;
+    const backgroundId = getOptions().some(
+      option => option.dataset.backgroundOption === savedBackground
+    )
+      ? savedBackground
+      : DEFAULT_BACKGROUND;
     const savedOpacity = Number.parseInt(
       localStorage.getItem(OPACITY_KEY) ?? String(DEFAULT_OPACITY),
       10
     );
-    applyBackground(savedBackground, false);
+    applyBackground(backgroundId, false);
     applyOpacity(
       Number.isFinite(savedOpacity) ? savedOpacity : DEFAULT_OPACITY,
       false
