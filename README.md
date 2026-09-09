@@ -1,111 +1,72 @@
 # Link 的个人站点
 
-基于 [Astro](https://astro.build/) 的个人博客与笔记 monorepo，统一承载博客文章和知识笔记。
+这是一个由两个独立 Astro 站点组成的个人内容仓库：博客用于发布成文文章，笔记站用于维护按主题组织的知识库。
 
 ## 站点
 
-| 站点 | 地址 | 说明 |
-|---|---|---|
-| 📝 博客 | [link-blog.vercel.app](https://link-blog.vercel.app) | 技术文章、项目记录 |
-| 📚 笔记 | [links-note.vercel.app](https://links-note.vercel.app) | 知识库，按主题分类 |
+| 目录 | 用途 | 地址 | 技术栈 |
+|---|---|---|---|
+| `blog/` | 技术文章、项目记录 | [link-blog.vercel.app](https://link-blog.vercel.app) | Astro + AstroPaper + Tailwind |
+| `note/` | 学习笔记、知识库 | [links-note.vercel.app](https://links-note.vercel.app) | Astro + Starlight |
 
-## 技术栈
+两个目录都是独立项目，各自拥有 `package.json` 和 `package-lock.json`，统一使用 npm。
 
-| 站点 | 框架 | 主题 | 样式 | 部署 |
-|---|---|---|---|---|
-| blog | Astro 7 | [AstroPaper](https://github.com/satnaing/astro-paper) | Tailwind CSS 4 | Vercel |
-| note | Astro 7 | [Starlight](https://starlight.astro.build/) | Starlight 内置 | Vercel |
+## 目录结构
 
-## 项目结构
-
-```
-├── blog/                    # 博客站 (AstroPaper)
-│   └── src/
-│       ├── content/
-│       │   ├── posts/       # 博客文章 (*.md)
-│       │   └── pages/       # 独立页面 (关于等)
-│       ├── pages/           # Astro 页面路由
-│       ├── layouts/         # 页面布局
-│       ├── components/      # 公共组件
-│       └── i18n/lang/       # 多语言翻译 (zh-CN / en)
-├── note/                    # 笔记站 (Starlight)
-│   ├── astro.config.mjs     # Starlight 配置 (侧边栏、分类)
-│   └── src/content/docs/    # 笔记内容 (*.mdx)
-│       ├── deep-learning/   # 深度学习
-│       ├── code-algorithm/  # 代码算法
-│       ├── tools/           # 工具使用
-│       └── minds/           # 随想记录
+```text
+E:/Blog/
+├── blog/                    # 博客站
+│   ├── src/content/posts/   # 博客文章（.md / .mdx）
+│   ├── src/content/pages/   # 独立页面
+│   ├── src/pages/           # Astro 路由
+│   ├── src/components/      # 公共组件
+│   ├── src/layouts/         # 页面布局
+│   ├── src/utils/           # 文章处理和 URL 工具
+│   ├── astro.config.ts       # Astro、Markdown、i18n 配置
+│   └── astro-paper.config.ts # 站点信息和功能开关
+├── note/                    # 笔记站
+│   ├── src/content/docs/    # 笔记内容（.md / .mdx）
+│   ├── src/styles/          # 自定义样式
+│   └── astro.config.mjs     # Starlight 侧边栏和站点配置
+└── .github/workflows/ci.yml # 两个站点的持续集成
 ```
 
-## 本地运行
+## 本地开发
+
+在两个终端中分别启动：
 
 ```bash
-# 博客站
 cd blog
-npm install
-npm run dev        # http://localhost:4321
+npm ci
+npm run dev              # http://localhost:4321
+```
 
-# 笔记站
+```bash
 cd note
-npm install
-npm run dev        # http://localhost:4322
+npm ci
+npm run dev              # http://localhost:4322
 ```
 
-## 发布文章
+## 写内容
 
-### 写博客
+博客文章放在 `blog/src/content/posts/`，需要填写 `title`、`description`、`pubDatetime` 和 `tags` 等 front matter。完整字段约束见 `blog/src/content.config.ts`。
 
-在 `blog/src/content/posts/` 下新建 `.md` 文件：
+笔记放在 `note/src/content/docs/` 对应分类目录中。侧边栏会根据目录自动生成，新增 Markdown 文件后即可出现对应导航项。
 
-```markdown
----
-author: Link
-pubDatetime: 2026-08-11T22:00:00.000Z
-title: 文章标题
-featured: false
-draft: false
-tags:
-  - 标签1
-  - 标签2
-description: 文章摘要
----
+## 构建
 
-正文内容...
+```bash
+cd blog && npm run build
+cd note && npm run build
 ```
 
-### 写笔记
-
-在 `note/src/content/docs/` 对应分类目录下新建 `.mdx` 文件。
-
-例如 `note/src/content/docs/deep-learning/transformer.mdx`：
-
-```markdown
----
-title: Transformer 详解
-description: Transformer 架构的核心原理
----
-
-## 注意力机制
-...
-```
-
-笔记站会根据文件目录结构自动生成左侧导航栏。
+博客构建还会生成 Pagefind 搜索索引；两个站点的 `dist/` 都是构建产物，不是源码。
 
 ## 部署
 
-推送到 `main` 分支后，Vercel 自动部署：
+两个站点分别连接到 Vercel：
 
-```bash
-git add .
-git commit -m "新文章：xxx"
-git push
-```
+- 博客的 Root Directory：`blog`
+- 笔记站的 Root Directory：`note`
 
-- **blog**：Vercel Root Directory 设为 `blog`
-- **note**：Vercel Root Directory 设为 `note`
-
-## 许可证
-
-博客主题基于 [AstroPaper](https://github.com/satnaing/astro-paper) (MIT)，笔记站基于 [Starlight](https://github.com/withastro/starlight) (MIT)。
-
-本站内容采用 MIT 许可证。
+推送到 `main` 后由 Vercel 自动构建和部署。

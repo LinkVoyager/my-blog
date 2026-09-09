@@ -5,6 +5,26 @@
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+/* Background images are selected in BackgroundSwitcher. The opacity is user-controlled. */
+body {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--background);
+}
+
+body::before {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  background-image: var(--site-background-image, none);
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+  content: "";
+  opacity: var(--site-background-opacity, 0.28);
+  pointer-events: none;
+}
+
 @layer base {
   * {
     @apply border-border outline-accent/75;

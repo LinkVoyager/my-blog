@@ -1,49 +1,30 @@
-# Starlight Starter Kit: Basics
+# 笔记站
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+`note/` 是基于 Astro Starlight 的中文知识库，部署地址为 <https://links-note.vercel.app>。
 
-```
-npm create astro@latest -- --template starlight
-```
+## 常用命令
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro + Starlight project, you'll see the following folders and files:
-
-```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
+```bash
+npm ci
+npm run dev
+npm run build
+npm run preview
 ```
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+开发服务器固定运行在 `http://localhost:4322`，可与博客站同时启动。
 
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
+## 内容
 
-Static assets, like favicons, can be placed in the `public/` directory.
+所有笔记放在 `src/content/docs/`：
 
-## 🧞 Commands
+```text
+src/content/docs/
+├── deep-learning/   # 深度学习
+├── code-algorithm/  # 代码算法
+├── tools/           # 工具使用
+└── minds/           # 随想记录
+```
 
-All commands are run from the root of the project, from a terminal:
+每个目录的侧边栏项目由 `astro.config.mjs` 的 `autogenerate` 自动生成。笔记集合使用 `src/content.config.ts` 中的 Starlight `docsLoader` 和 `docsSchema`。
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+Markdown 已启用数学公式支持，样式位于 `src/styles/math.css`。
