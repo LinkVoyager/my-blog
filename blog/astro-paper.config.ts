@@ -3,7 +3,7 @@ import { defineAstroPaperConfig } from "./src/types/config";
 export default defineAstroPaperConfig({
   site: {
     url: "https://link-blog.vercel.app/",
-    title: "Link的思考",
+    title: "Link‘s Blog",
     description: "记录深度学习、算法实践、工具使用与个人思考。",
     author: "Link",
     profile: "https://github.com/LinkVoyager",
