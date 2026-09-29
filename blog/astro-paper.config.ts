@@ -4,9 +4,10 @@ export default defineAstroPaperConfig({
   site: {
     url: "https://link-blog.vercel.app/",
     title: "Link的思考",
-    description: "Just record it",
+    description: "记录深度学习、算法实践、工具使用与个人思考。",
     author: "Link",
     profile: "https://github.com/LinkVoyager",
+    noteUrl: "https://links-note.vercel.app/",
     ogImage: "default-og.jpg",
     lang: "zh-CN",
     timezone: "Asia/Shanghai",
@@ -29,10 +30,13 @@ export default defineAstroPaperConfig({
     search: "pagefind",
   },
   socials: [
-    { name: "github",   url: "https://github.com/LinkVoyager" },
-    { name: "x",        url: "https://x.com/username" },
-    { name: "linkedin", url: "https://www.linkedin.com/in/username/" },
-    { name: "mail",     url: "mailto:yourmail@gmail.com" },
+    { name: "github", url: "https://github.com/LinkVoyager" },
+    {
+      name: "zhihu",
+      url: "https://www.zhihu.com/people/wang-nian-chen-11",
+      linkTitle: "在知乎关注 Link",
+    },
+    { name: "mail", url: "mailto:19839500635@163.com" },
   ],
   shareLinks: [
     { name: "whatsapp", url: "https://wa.me/?text=" },

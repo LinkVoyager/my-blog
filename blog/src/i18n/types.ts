@@ -6,6 +6,7 @@ export interface UIStrings {
     about: string;
     archives: string;
     search: string;
+    notes: string;
   };
   post: {
     publishedAt: string;
@@ -19,6 +20,10 @@ export interface UIStrings {
     editPage: string;
     previousPost: string;
     nextPost: string;
+    readingTime: string;
+    tableOfContents: string;
+    relatedPosts: string;
+    series: string;
   };
   pagination: {
     prev: string;
@@ -30,6 +35,9 @@ export interface UIStrings {
     featured: string;
     recentPosts: string;
     allPosts: string;
+    notesIntro: string;
+    notesLink: string;
+    topics: string;
   };
   footer: {
     copyright: string;
@@ -50,6 +58,7 @@ export interface UIStrings {
 
     searchTitle: string;
     searchDesc: string;
+    aboutTitle: string;
   };
   a11y: {
     skipToContent: string;

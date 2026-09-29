@@ -9,6 +9,7 @@
 body {
   position: relative;
   isolation: isolate;
+  overflow-x: clip;
   background-color: var(--background);
 }
 
@@ -35,6 +36,11 @@ body::before {
   button,
   #main-content {
     @apply outline-accent outline-offset-1 focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-dashed;
+  }
+
+  #main-content {
+    overflow-wrap: anywhere;
+    word-break: break-all;
   }
   button:not(:disabled),
   [role="button"]:not(:disabled) {

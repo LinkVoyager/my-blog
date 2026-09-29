@@ -13,7 +13,7 @@ import { getSortedPosts } from "@/utils/getSortedPosts";
 import { useTranslations } from "@/i18n";
 import config from "@/config";
 
-const { socials, posts: postsConfig } = config;
+const { socials, posts: postsConfig, site } = config;
 
 const locale = Astro.currentLocale ?? config.site.lang;
 const t = useTranslations(locale);
@@ -31,7 +31,7 @@ const homePath = getRelativeLocaleUrl(locale, "");
     id="main-content"
     data-layout="index"
     data-home-path={homePath}
-    class="app-layout my-1"
+    class="app-layout my-1 break-words"
   >
     <section id="hero" class="border-border border-b pt-8 pb-6">
       <h1 class="my-4 inline-block text-4xl font-bold sm:my-8 sm:text-5xl">
@@ -76,6 +76,49 @@ const homePath = getRelativeLocaleUrl(locale, "");
         )
       }
     </section>
+
+    {
+      site.noteUrl && (
+        <section
+          id="notes"
+          class="border-border bg-background/45 my-8 rounded-xl border p-5 backdrop-blur-sm sm:p-6"
+        >
+          <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-baseline sm:justify-between">
+            <div>
+              <h2 class="text-2xl font-semibold tracking-wide">
+                {t.home.topics}
+              </h2>
+              <p class="text-muted-foreground mt-2">{t.home.notesIntro}</p>
+            </div>
+            <a
+              href={site.noteUrl}
+              target="_blank"
+              rel="noreferrer"
+              class="text-accent decoration-dashed underline-offset-4 hover:underline"
+            >
+              {t.home.notesLink} <span aria-hidden="true">→</span>
+            </a>
+          </div>
+          <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ["深度学习", "deep-learning"],
+              ["代码算法", "code-algorithm"],
+              ["工具使用", "tools"],
+              ["随想记录", "minds"],
+            ].map(([label, path]) => (
+              <a
+                href={`${site.noteUrl}${path}/`}
+                target="_blank"
+                rel="noreferrer"
+                class="border-border bg-background/35 hover:border-accent hover:text-accent rounded-lg border px-4 py-3 text-sm transition hover:-translate-y-0.5"
+              >
+                {label}
+              </a>
+            ))}
+          </div>
+        </section>
+      )
+    }
 
     {
       featuredPosts.length > 0 && (

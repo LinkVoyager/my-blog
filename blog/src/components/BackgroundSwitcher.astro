@@ -13,16 +13,16 @@ const backgrounds = [
     type="button"
     aria-expanded="false"
     aria-controls="background-picker"
-    aria-label="切换背景"
-    title="切换背景"
+    aria-label="阅读设置"
+    title="阅读设置"
   >
-    背景
+    阅读设置
   </button>
   <div
     id="background-picker"
     class="bg-background border-border absolute top-full right-0 z-30 mt-2 hidden w-64 rounded-lg border p-2 shadow-lg"
   >
-    <p class="text-muted-foreground px-2 py-1 text-xs">选择背景</p>
+    <p class="text-muted-foreground px-2 py-1 text-xs">背景与阅读显示</p>
     <div class="grid gap-1" role="listbox" aria-label="背景图片">
       {
         backgrounds.map(background => (

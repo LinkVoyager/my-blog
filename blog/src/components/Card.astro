@@ -2,15 +2,18 @@
 import type { CollectionEntry } from "astro:content";
 import { getPostUrl } from "@/utils/getPostPaths";
 import { toTransitionName } from "@/utils/toTransitionName";
+import { getReadingTime } from "@/utils/getReadingTime";
+import { useTranslations } from "@/i18n";
 import Datetime from "./Datetime.astro";
 
 type Props = {
   variant?: "h2" | "h3";
 } & CollectionEntry<"posts">;
 
-const { variant: Heading = "h2", id, data, filePath } = Astro.props;
+const { variant: Heading = "h2", id, data, filePath, body } = Astro.props;
 
 const { title, description, ...props } = data;
+const t = useTranslations(Astro.currentLocale);
 ---
 
 <li class="my-6">
@@ -26,6 +29,12 @@ const { title, description, ...props } = data;
       {title}
     </Heading>
   </a>
-  <Datetime {...props} />
+  <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+    <Datetime {...props} />
+    <span class="text-muted-foreground text-sm">
+      · {getReadingTime(body)}
+      {t.post.readingTime}
+    </span>
+  </div>
   <p>{description}</p>
 </li>

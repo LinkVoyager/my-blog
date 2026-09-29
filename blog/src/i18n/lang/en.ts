@@ -8,6 +8,7 @@ export default {
     about: "About",
     archives: "Archives",
     search: "Search",
+    notes: "Notes",
   },
   post: {
     publishedAt: "Published at",
@@ -21,6 +22,10 @@ export default {
     editPage: "Edit page",
     previousPost: "Previous Post",
     nextPost: "Next Post",
+    readingTime: "min read",
+    tableOfContents: "On this page",
+    relatedPosts: "Related posts",
+    series: "Series",
   },
   pagination: {
     prev: "Prev",
@@ -32,6 +37,9 @@ export default {
     featured: "Featured",
     recentPosts: "Recent Posts",
     allPosts: "All Posts",
+    notesIntro: "A searchable knowledge base for my ongoing notes.",
+    notesLink: "Visit notes",
+    topics: "Explore topics",
   },
   footer: {
     copyright: "Copyright",
@@ -52,6 +60,7 @@ export default {
 
     searchTitle: "Search",
     searchDesc: "Search any article ...",
+    aboutTitle: "About",
   },
   a11y: {
     skipToContent: "Skip to content",

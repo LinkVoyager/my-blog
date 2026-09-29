@@ -8,6 +8,7 @@ export default {
     about: "关于",
     archives: "归档",
     search: "搜索",
+    notes: "笔记",
   },
   post: {
     publishedAt: "发布于",
@@ -21,6 +22,10 @@ export default {
     editPage: "编辑页面",
     previousPost: "上一篇",
     nextPost: "下一篇",
+    readingTime: "分钟阅读",
+    tableOfContents: "文章目录",
+    relatedPosts: "相关文章",
+    series: "系列",
   },
   pagination: {
     prev: "上一页",
@@ -32,6 +37,9 @@ export default {
     featured: "精选",
     recentPosts: "最近文章",
     allPosts: "全部文章",
+    notesIntro: "把零散记录整理成可检索的知识笔记。",
+    notesLink: "访问笔记站",
+    topics: "主题入口",
   },
   footer: {
     copyright: "版权所有",
@@ -52,6 +60,7 @@ export default {
 
     searchTitle: "搜索",
     searchDesc: "搜索文章 ...",
+    aboutTitle: "关于",
   },
   a11y: {
     skipToContent: "跳到内容",

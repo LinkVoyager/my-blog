@@ -100,6 +100,15 @@ const isActive = (path: string) => {
           </a>
         </li>
         {
+          site.noteUrl && (
+            <li class="col-span-2">
+              <a href={site.noteUrl} target="_blank" rel="noreferrer">
+                {t.nav.notes}
+              </a>
+            </li>
+          )
+        }
+        {
           features.showArchives && (
             <li class="col-span-2">
               <LinkButton

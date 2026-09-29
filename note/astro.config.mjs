@@ -26,6 +26,11 @@ export default defineConfig({
           label: "GitHub",
           href: "https://github.com/LinkVoyager",
         },
+        {
+          icon: "external",
+          label: "Link 的博客",
+          href: "https://link-blog.vercel.app/",
+        },
       ],
       sidebar: [
         {

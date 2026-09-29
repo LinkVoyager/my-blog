@@ -5,6 +5,8 @@ description: "关于我和这个博客。"
 
 嗨，我是 Link。这个博客用来记录我在学习过程中的思考和笔记。
 
+你可以在 [GitHub](https://github.com/LinkVoyager) 查看项目代码，也可以在 [知乎](https://www.zhihu.com/people/wang-nian-chen-11) 关注我的技术分享。欢迎通过 [19839500635@163.com](mailto:19839500635@163.com) 与我交流。
+
 ## 博客内容
 
 这里主要涉及以下几个方面：
@@ -22,4 +24,4 @@ description: "关于我和这个博客。"
 
 ## 联系我
 
-欢迎通过邮件或 GitHub 与我交流，有任何想法或问题都可以随时联系。
+博客文章与[知识笔记](https://links-note.vercel.app/)分别承担成文分享和持续整理的角色，会持续更新。
