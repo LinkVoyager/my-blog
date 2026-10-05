@@ -1,5 +1,5 @@
 ---
-title: 后训练（Post-training）：从指令对齐到推理能力
+title: 后训练（Post-training）
 description: 简单梳理 SFT、RLHF、DPO 和 Reasoning RL 的目标、流程、差异与适用场景
 ---
 
