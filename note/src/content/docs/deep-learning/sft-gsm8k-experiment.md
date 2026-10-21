@@ -7,6 +7,8 @@ description: 从条件语言模型、response mask 到 LoRA 和训练评估的�
 
 完整实验案例见：[从 128 条到 7473 条：一次 SFT 实现与五组 GSM8K 实验复盘](https://link-blog.vercel.app/posts/sft-gsm8k-data-scale-review-20261021/)。
 
+下面的代码卡片优先取自本机 `E:\Code\CS336\cs336-5` 的 `cs336_alignment/sft_dataset.py`、`sft_utils.py` 和 `train_sft_step.py`。为了便于阅读，只保留函数核心逻辑；完整脚本、参数解析和日志代码仍以项目源码为准。
+
 ## 一、SFT 在训练流程中的位置
 
 语言模型训练通常可以分成几类目标：
@@ -49,7 +51,7 @@ SFT 的训练 loss 低，表示模型更愿意复现示范回答；它不自动�
 
 最简单的数据格式是：
 
-```json
+```json title="prompt/response 样本"
 {
   "prompt": "解释梯度下降的基本思想。",
   "response": "梯度下降通过沿损失函数的负梯度方向更新参数……"
@@ -58,7 +60,7 @@ SFT 的训练 loss 低，表示模型更愿意复现示范回答；它不自动�
 
 多轮对话通常使用 `messages`：
 
-```json
+```json title="多轮对话样本"
 {
   "messages": [
     {"role": "system", "content": "你是一个严谨的助理。"},
@@ -68,21 +70,35 @@ SFT 的训练 loss 低，表示模型更愿意复现示范回答；它不自动�
 }
 ```
 
-不同模型的角色标记和特殊 token 不同，应该优先使用 tokenizer 自带的 chat template，而不是手写 `<|user|>` 或 `<|assistant|>`：
+不同模型的角色标记和特殊 token 不同，应该优先使用 tokenizer 自带的 chat template，而不是手写 `<|user|>` 或 `<|assistant|>`。如果项目使用 Alpaca 风格数据，也要把模板作为训练代码的一部分固定下来。
 
-```python
-def render_sft_example(messages, tokenizer):
-    # 只把用户上下文放进 prompt，保留生成 assistant 的起始标记
-    prompt = tokenizer.apply_chat_template(
-        messages[:-1],
-        tokenize=False,
-        add_generation_prompt=True,
-    )
-    response = messages[-1]["content"]
-    if tokenizer.eos_token:
-        response += tokenizer.eos_token
-    return prompt, response
+下面这段来自本机 `E:\Code\CS336\cs336-5\cs336_alignment\sft_dataset.py` 的实际模板逻辑：
+
+```python title="cs336_alignment/sft_dataset.py · Alpaca template"
+# Source: cs336_alignment/sft_dataset.py
+template = (
+    "Below is an instruction that describes a task. "
+    "Write a response that appropriately completes the request.\n\n"
+    "### Instruction:\n{prompt}\n\n"
+    "### Response:\n{response}"
+)
+
+formatted_text = template.format(prompt=p, response=r)
+full_tokens = tokenizer.encode(
+    formatted_text,
+    add_special_tokens=False,
+)
+
+prompt_text = template.format(prompt=p, response="")
+prompt_tokens = tokenizer.encode(
+    prompt_text,
+    add_special_tokens=False,
+)
+labels = list(full_tokens)
+labels[: len(prompt_tokens)] = [-100] * len(prompt_tokens)
 ```
+
+这里的 `-100` 是 PyTorch 交叉熵的 `ignore_index`：prompt 仍然进入模型上下文，但对应的 label 不产生监督。若改用显式 `response_mask`，则保留合法 token id，再在 loss 计算时乘上 mask。
 
 `EOS` 很重要：它告诉模型回答何时结束。截断时如果把回答末尾的 `EOS` 一起截掉，生成阶段可能不容易停止；如果把下一个样本的内容拼进来而没有边界，模型也会学到错误的转移关系。
 
@@ -90,7 +106,7 @@ def render_sft_example(messages, tokenizer):
 
 假设拼接后的 token 是 `[P1, P2, R1, R2]`，因果语言模型的输入和标签需要错开一个位置：
 
-```text
+```text title="causal language model 的 shift 对齐"
 完整序列：      P1  P2  R1  R2
 模型输入：      P1  P2  R1
 目标 labels：   P2  R1  R2
@@ -99,39 +115,52 @@ def render_sft_example(messages, tokenizer):
 
 `R1` 由 prompt 的最后一个 token 预测，`R2` 由 prompt 和 `R1` 共同预测。mask 必须和 `labels` 一样在 shift 后对齐；如果仍使用未 shift 的 mask，会把错误的位置计入 loss。
 
-下面是一个不依赖具体模型的最小整理函数：
+下面是本机 `cs336-5` 项目 `sft_utils.py` 中的核心整理逻辑。输入是字符串列表，输出的三个张量形状都是 `[B, L-1]`：
 
-```python
+```python title="cs336_alignment/sft_utils.py · tokenize_prompt_and_output"
 import torch
 
 
-def pack_prompt_response(prompt, response, tokenizer):
-    prompt_ids = tokenizer.encode(prompt, add_special_tokens=False)
-    response_ids = tokenizer.encode(response, add_special_tokens=False)
+def tokenize_prompt_and_output(prompt_strs, output_strs, tokenizer):
+    all_input_ids = []
+    all_response_masks = []
+    all_lengths = []
 
-    ids = prompt_ids + response_ids
-    # 0：prompt，不监督；1：response，参与监督
-    response_mask = [0] * len(prompt_ids) + [1] * len(response_ids)
+    for prompt, output in zip(prompt_strs, output_strs):
+        prompt_ids = tokenizer.encode(prompt, add_special_tokens=False)
+        output_ids = tokenizer.encode(output, add_special_tokens=False)
+
+        all_input_ids.append(prompt_ids + output_ids)
+        all_response_masks.append(
+            [0] * len(prompt_ids) + [1] * len(output_ids)
+        )
+        all_lengths.append(len(prompt_ids) + len(output_ids))
+
+    max_len = max(all_lengths)
+    pad_id = (
+        tokenizer.pad_token_id
+        if tokenizer.pad_token_id is not None
+        else tokenizer.eos_token_id
+    )
+    padded_ids = torch.full(
+        (len(prompt_strs), max_len), pad_id, dtype=torch.long
+    )
+    padded_masks = torch.zeros_like(padded_ids)
+
+    for row, (ids, mask) in enumerate(
+        zip(all_input_ids, all_response_masks)
+    ):
+        padded_ids[row, : len(ids)] = torch.tensor(ids)
+        padded_masks[row, : len(mask)] = torch.tensor(mask)
 
     return {
-        "ids": ids,
-        "response_mask": response_mask,
-    }
-
-
-def shift_for_causal_lm(ids, response_mask, attention_mask):
-    ids = torch.as_tensor(ids)
-    response_mask = torch.as_tensor(response_mask, dtype=torch.bool)
-    attention_mask = torch.as_tensor(attention_mask, dtype=torch.bool)
-
-    return {
-        "input_ids": ids[:-1],
-        "labels": ids[1:],
-        "response_mask": response_mask[1:],
-        # label 对应的位置如果是 padding，也必须排除
-        "label_valid": attention_mask[1:],
+        "input_ids": padded_ids[:, :-1],
+        "labels": padded_ids[:, 1:],
+        "response_mask": padded_masks[:, 1:],
     }
 ```
+
+这个项目的函数没有单独返回 `attention_mask`：padding 的 `response_mask` 保持为 0，loss 阶段会把它排除。另一个 `sft_dataset.py` 实现则使用 `labels=-100` 配合 `F.cross_entropy(ignore_index=-100)`；两条路径的 mask 约定不能混用。
 
 在 batch 中通常先右侧 padding，再分别构造 `attention_mask`、`response_mask`，最后同时取 `[:, :-1]` 和 `[:, 1:]`。`attention_mask` 负责告诉 Transformer 哪些输入位置存在；`response_mask` 负责告诉损失函数哪些目标位置属于回答。这两个 mask 的职责不同，不能混为一谈。
 
@@ -139,19 +168,22 @@ def shift_for_causal_lm(ids, response_mask, attention_mask):
 
 模型输出的 logits 形状通常是 `[B, L, V]`：batch、序列长度和词表大小。只取目标 token 的 log probability：
 
-```python
-import torch.nn.functional as F
+本机项目的 step-based 训练路径使用 `logsumexp` 和 `gather`，只提取目标 token 的 log probability，避免显式保存完整的 `[B, L, V]` 概率张量：
 
+```python title="cs336_alignment/train_sft_step.py · 显存友好的 log-prob"
+# logits: [B, L, V]
+lse = torch.logsumexp(logits, dim=-1)                  # [B, L]
+target_logits = torch.gather(
+    logits,
+    dim=-1,
+    index=batch["labels"].unsqueeze(-1),               # [B, L, 1]
+).squeeze(-1)                                           # [B, L]
 
-def token_nll(logits, labels):
-    # 在 float 中计算归一化，避免低精度下 logsumexp 数值不稳定
-    log_probs = F.log_softmax(logits.float(), dim=-1)
-    target_log_probs = log_probs.gather(
-        dim=-1,
-        index=labels.unsqueeze(-1),
-    ).squeeze(-1)
-    return -target_log_probs  # [B, L]
+log_probs = target_logits - lse
+nll_per_token = -log_probs
 ```
+
+同一项目的 `sft_utils.py` 也提供了等价的 `F.log_softmax(...)+gather` 写法。两者都要求 `labels` 是合法 token id；如果使用 `-100` 屏蔽 prompt，就应该改用 `F.cross_entropy(ignore_index=-100)`，或先替换/过滤再调用 `gather`。
 
 拿到每个 token 的 NLL 后，mask 掉 prompt 和 padding。常见的归一化方式有三种：
 
@@ -163,32 +195,40 @@ def token_nll(logits, labels):
 
 当前素材中的实现属于第一种：每条回答先求和，再按样本数平均。它适合明确把完整回答看作一个训练样本，但不能把日志 loss 直接当作 token 平均交叉熵，也不能跨项目比较后直接取指数当作 perplexity。
 
-一个同时展示两种口径的实现如下：
+本机项目把 mask 归一化和梯度累积拆成两个函数。下面保留 `cs336_alignment/sft_utils.py` 的关键逻辑，并用标题标出来源：
 
-```python
-def masked_sft_loss(logits, labels, response_mask, label_valid=None):
-    nll = token_nll(logits, labels)
-    mask = response_mask.bool()
-    if label_valid is not None:
-        mask = mask & label_valid.bool()
+```python title="cs336_alignment/sft_utils.py · masked_normalize + sft_microbatch_train_step"
+def masked_normalize(tensor, mask, normalize_constant, dim=None):
+    masked_tensor = tensor * mask
+    total_sum = torch.sum(masked_tensor, dim=dim)
+    return total_sum / normalize_constant
 
-    if not mask.any(dim=1).all():
-        raise ValueError("每个样本都必须至少有一个有效 response token")
 
-    masked_nll = nll.masked_fill(~mask, 0.0)
-    tokens_per_sample = mask.sum(dim=1)
+def sft_microbatch_train_step(
+    policy_log_probs,
+    response_mask,
+    gradient_accumulation_steps,
+    normalize_constant=1.0,
+):
+    batch_size = policy_log_probs.shape[0]
+    nll_per_token = -policy_log_probs
 
-    # 口径 A：回答 token 求和，再按样本平均
-    sample_sum_loss = masked_nll.sum(dim=1).mean()
+    total_masked_loss = masked_normalize(
+        tensor=nll_per_token,
+        mask=response_mask,
+        normalize_constant=normalize_constant,
+        dim=None,
+    )
 
-    # 口径 B：整个 batch 按有效 token 平均
-    token_mean_loss = masked_nll.sum() / mask.sum().clamp_min(1)
+    # 项目采用：回答 token 求和 → batch 平均
+    microbatch_loss = total_masked_loss / batch_size
+    scaled_loss = microbatch_loss / gradient_accumulation_steps
+    scaled_loss.backward()
 
-    # 口径 C：每个样本先做 token 平均，再对样本平均
-    per_sample_mean = masked_nll.sum(dim=1) / tokens_per_sample
-    sample_mean_loss = per_sample_mean.mean()
-    return sample_sum_loss, token_mean_loss, sample_mean_loss
+    return scaled_loss, {"loss": microbatch_loss.detach()}
 ```
+
+如果要改成全 batch token 平均，分母可以写成 `response_mask.sum().clamp_min(1)`；如果要让每个样本等权，则先对每行按有效 token 数归一化，再对 batch 求平均。梯度累积时要固定选择一种口径，否则不同 micro-batch 的回答长度会改变有效样本权重。
 
 如果采用 Hugging Face 的 `CrossEntropyLoss(ignore_index=-100)`，可以把 prompt 和 padding 对应的 label 设为 `-100`。但 `-100` 不能直接传给 `gather` 作为词表索引；使用手写 `gather` 时应保留合法的 label，再单独用 mask 排除无监督位置。
 
@@ -211,27 +251,39 @@ SFT 的上限通常由示范数据决定，而不只是由模型大小决定。�
 
 显存放不下目标 batch 时，可以把一个更新拆成多个 micro-batch。核心是每次反向传播前除以累积步数：
 
-```python
-for update in range(num_updates):
-    optimizer.zero_grad(set_to_none=True)
+本机 `train_sft_step.py` 的更新循环把随机 micro-batch、loss 缩放和参数更新分开：
 
-    for _ in range(accum_steps):
-        batch = next(train_iter)
-        outputs = model(
-            input_ids=batch["input_ids"],
-            attention_mask=batch["attention_mask"],
-        )
-        loss, _, _ = masked_sft_loss(
-            outputs.logits,
-            batch["labels"],
-            batch["response_mask"],
-            batch.get("label_valid"),
-        )
-        (loss / accum_steps).backward()
+```python title="cs336_alignment/train_sft_step.py · gradient accumulation"
+for step in range(args.max_steps):
+    accumulated_loss = 0.0
 
-    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+    for _ in range(grad_accum_steps):
+        batch = get_batch(
+            tokenized_train_data,
+            args.micro_batch_size,
+            args.device,
+        )
+        logits = policy(batch["input_ids"]).logits
+
+        lse = torch.logsumexp(logits, dim=-1)
+        target_logits = torch.gather(
+            logits,
+            -1,
+            batch["labels"].unsqueeze(-1),
+        ).squeeze(-1)
+        log_probs = target_logits - lse
+
+        loss, _ = sft_microbatch_train_step(
+            policy_log_probs=log_probs,
+            response_mask=batch["response_mask"],
+            gradient_accumulation_steps=grad_accum_steps,
+            normalize_constant=1.0,
+        )
+        accumulated_loss += loss.item() * grad_accum_steps
+
+    torch.nn.utils.clip_grad_norm_(policy.parameters(), 1.0)
     optimizer.step()
-    scheduler.step()
+    optimizer.zero_grad()
 ```
 
 有效 batch 大致等于 `micro_batch_size × accum_steps`，但变长序列时显存占用和有效 token 数仍会变化。`batch_size` 这个参数名不会自动改变累积逻辑；应在代码里显式计算并断言实际的累积步数。
@@ -265,7 +317,7 @@ $$
 
 使用 PEFT 的最小配置示例：
 
-```python
+```python title="PEFT · LoRA 配置示例"
 from peft import LoraConfig, get_peft_model
 
 config = LoraConfig(
@@ -292,30 +344,34 @@ model.print_trainable_parameters()
 4. **错误分解**：把格式错误、答案错误、截断和空输出分开统计，避免把所有失败归为同一种问题。
 5. **数据隔离**：验证集和测试集不能参与训练调参，也要检查近重复和 benchmark contamination。
 
-生成评估的骨架可以写成：
+本机项目使用 vLLM 做生成评估，先固定采样参数，再把 PyTorch policy 的权重同步进去：
 
-```python
-@torch.no_grad()
-def generate_and_score(model, tokenizer, prompts, score_fn):
-    model.eval()
-    inputs = tokenizer(
-        prompts,
-        return_tensors="pt",
-        padding=True,
-        truncation=True,
-    ).to(model.device)
+```python title="cs336_alignment/train_sft_step.py · evaluation setup"
+from vllm import SamplingParams
 
-    outputs = model.generate(
-        **inputs,
-        do_sample=False,
-        max_new_tokens=512,
-        eos_token_id=tokenizer.eos_token_id,
+eval_sampling_params = SamplingParams(
+    temperature=0.0,          # greedy decoding
+    max_tokens=args.max_tokens,
+    stop=["</answer>"],
+    include_stop_str_in_output=True,
+)
+
+
+def load_policy_into_vllm_instance(policy, llm):
+    state_dict = policy.state_dict()
+    llm_model = (
+        llm.llm_engine.model_executor
+        .driver_worker.model_runner.model
     )
-    texts = tokenizer.batch_decode(outputs, skip_special_tokens=False)
-    return [score_fn(text) for text in texts]
+    llm_model.load_weights(state_dict.items())
+
+
+policy.eval()
+load_policy_into_vllm_instance(policy, vllm_inst)
+outputs = vllm_inst.generate(prompts, eval_sampling_params)
 ```
 
-如果训练使用 PyTorch、生成使用另一个推理引擎，还要确认评估前已经同步最新权重，并清理推理引擎缓存。否则指标可能对应旧 checkpoint。
+如果训练使用 PyTorch、生成使用另一个推理引擎，还要确认评估前已经同步最新权重，并清理推理引擎的 prefix cache。否则指标可能对应旧 checkpoint。
 
 ## 九、常见实现陷阱
 
