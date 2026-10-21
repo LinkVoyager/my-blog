@@ -1,0 +1,20 @@
+{
+  "batch_size": "64",
+  "dataset_size": "7473",
+  "device": "cuda:0",
+  "eval_every_steps": "8",
+  "filter_correct": "false",
+  "gradient_accumulation_steps": "32",
+  "lr": "2e-05",
+  "max_eval_samples": "1319",
+  "max_steps": "256",
+  "max_tokens": "1024",
+  "micro_batch_size": "2",
+  "model_id": "model/Qwen2.5-Math-1.5B",
+  "prompt_path": "cs336_alignment/prompts/r1_zero.prompt",
+  "seed": "42",
+  "train_data_path": "data/gsm8k/train_sft_reason_gsm8k_raw.jsonl",
+  "val_data_path": "data/gsm8k/test.jsonl",
+  "vllm_device": "cuda:0",
+  "vllm_gpu_util": "0.3"
+}

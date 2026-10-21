@@ -1,0 +1,12 @@
+{
+  "eval/avg_length_correct": 239.49467275494672,
+  "eval/avg_length_incorrect": 311.6631419939577,
+  "train/global_entropy": 1.07666015625,
+  "eval/answer_score": 0.4981046247156937,
+  "train/response_entropy": 0.035831451416015625,
+  "train/loss": 0.1373291015625,
+  "eval/format_score": 0.9863532979529946,
+  "eval/avg_length": 275.71569370735403,
+  "train_step": 256,
+  "eval/accuracy": 0.4981046247156937
+}

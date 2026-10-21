@@ -1,0 +1,14 @@
+[
+  {
+    "path": "data/gsm8k/train_sft_reason_gsm8k_raw.jsonl",
+    "bytes": 10678230,
+    "lines": 7473,
+    "sha256": "08b59f93377e4affc174baf1c5f014463d8c9c66959763f18f03e13594e672ab"
+  },
+  {
+    "path": "data/gsm8k/test.jsonl",
+    "bytes": 749738,
+    "lines": 1319,
+    "sha256": "3730d312f6e3440559ace48831e51066acaca737f6eabec99bccb9e4b3c39d14"
+  }
+]

@@ -1,0 +1,8 @@
+size=128: 33 evaluation points, final=49.8105%, best=72.1001%: OK
+size=256: 33 evaluation points, final=55.4966%, best=71.4177%: OK
+size=512: 33 evaluation points, final=56.0273%, best=73.4647%: OK
+size=1024: 33 evaluation points, final=61.3343%, best=73.0857%: OK
+size=7473: 33 evaluation points, final=74.9052%, best=74.9052%: OK
+14 sample tables validated (100 rows each).
+Source snapshot SHA-256 hashes: OK
+All exported result checks passed. No GPU training was run.

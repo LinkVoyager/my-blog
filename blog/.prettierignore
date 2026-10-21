@@ -15,3 +15,7 @@
 
 # Ignore MDX files
 *.mdx
+
+# Preserve the downloadable experiment archive as-is
+public/sft_blog_20261021/
+public/sft_blog_20261021.zip

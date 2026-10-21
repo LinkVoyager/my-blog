@@ -1,0 +1,13 @@
+# Recorded package versions for the size=7473 run; not a complete lockfile.
+transformers==4.51.3
+pylatexenc==2.10
+antlr4-python3-runtime==4.13.2
+tqdm==4.70.1
+sympy==1.13.1
+wandb==0.30.0
+flash_attn==2.7.4.post1
+latex2sympy2_extended==1.10.1
+numpy==1.26.4
+torch==2.5.1
+math-verify==0.7.0
+vllm==0.7.2

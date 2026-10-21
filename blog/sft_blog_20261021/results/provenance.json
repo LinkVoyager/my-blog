@@ -1,0 +1,56 @@
+[
+  {
+    "dataset_size": 128,
+    "original_log": "result/sft_size_comparison_20261021/sft_size128_steps256_gsm8k_single_gpu/train.log",
+    "original_wandb_directory": "wandb/run-20261021_084223-w94n9mon",
+    "log_sha256": "492153f64488cf831e6ccd6ca237956334e86196748052ac87bc9b17563a5a53",
+    "samples": [
+      "results/samples/size_128_step_0.json",
+      "results/samples/size_128_step_8.json",
+      "results/samples/size_128_step_256.json"
+    ]
+  },
+  {
+    "dataset_size": 256,
+    "original_log": "result/sft_size_comparison_20261021/sft_size256_steps256_gsm8k_single_gpu/train.log",
+    "original_wandb_directory": "wandb/run-20261021_091911-kxhu99uo",
+    "log_sha256": "d0f7be38c6d8b9671601dcbc491ad791f30f3142398e535cb8edfc5ea0c25e5c",
+    "samples": [
+      "results/samples/size_256_step_0.json",
+      "results/samples/size_256_step_8.json",
+      "results/samples/size_256_step_256.json"
+    ]
+  },
+  {
+    "dataset_size": 512,
+    "original_log": "result/sft_size_comparison_20261021/sft_size512_steps256_gsm8k_single_gpu/train.log",
+    "original_wandb_directory": "wandb/run-20261021_102304-alj99nl1",
+    "log_sha256": "b9e2c227f3f9fa1cd6454ffaa14af55470fffc205470f3e5dc0ad7226607195f",
+    "samples": [
+      "results/samples/size_512_step_0.json",
+      "results/samples/size_512_step_32.json",
+      "results/samples/size_512_step_256.json"
+    ]
+  },
+  {
+    "dataset_size": 1024,
+    "original_log": "result/sft_size_comparison_20261021/sft_size1024_steps256_gsm8k_single_gpu/train.log",
+    "original_wandb_directory": "wandb/run-20261021_105902-oewj6ucb",
+    "log_sha256": "8d61c65e073adc651d19d4ee64ffa29d03c86c5b55a562f179d804600ff212ce",
+    "samples": [
+      "results/samples/size_1024_step_0.json",
+      "results/samples/size_1024_step_72.json",
+      "results/samples/size_1024_step_256.json"
+    ]
+  },
+  {
+    "dataset_size": 7473,
+    "original_log": "result/sft_retrain_20261020_single_gpu/train.log",
+    "original_wandb_directory": "wandb/run-20261020_210935-a08aee35",
+    "log_sha256": "acde3ff21e21ab205872d040cd911fadd46a8f25dc7c8ddc254e7495a1e16dd7",
+    "samples": [
+      "results/samples/size_7473_step_0.json",
+      "results/samples/size_7473_step_256.json"
+    ]
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "source": "learning/drgrpo_grader.py",
+    "snapshot": "code/learning/drgrpo_grader.py",
+    "sha256": "f88b29b0e76b3c28f969cb8b2f945e01b70aed2753306445d30822a192c54ec7",
+    "kind": "current_workspace_snapshot"
+  },
+  {
+    "source": "learning/run_sft_sizes.sh",
+    "snapshot": "code/learning/run_sft_sizes.sh",
+    "sha256": "43f36a519d31aab50eb7a179e4662ad4dabf70c1323e1ede79824e38ead2125d",
+    "kind": "current_workspace_snapshot"
+  },
+  {
+    "source": "learning/sft_utils.py",
+    "snapshot": "code/learning/sft_utils.py",
+    "sha256": "d896e612714f78e4b2be1ec9f7eeb070f92ab2edcb491855ac82adee986f2f71",
+    "kind": "current_workspace_snapshot"
+  },
+  {
+    "source": "learning/train_sft_step.py",
+    "snapshot": "code/learning/train_sft_step.py",
+    "sha256": "e9df2e9f9aa554467597c4193ad0966985528f3d75a4011555b112e73754c7e3",
+    "kind": "current_workspace_snapshot"
+  }
+]
